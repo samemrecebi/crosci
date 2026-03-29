@@ -17,6 +17,8 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 
+      - uses: samemrecebi/ci-carbon-tracker/start@v1
+
       - name: Install uv
         uses: astral-sh/setup-uv@v7
 
@@ -32,6 +34,11 @@ jobs:
         with:
           name: cibw-sdist
           path: dist/*.tar.gz
+
+      - uses: samemrecebi/ci-carbon-tracker/stop@v1
+        if: always()
+        with:
+          pr-comment: "true"
 
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
@@ -54,6 +61,8 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 
+      - uses: samemrecebi/ci-carbon-tracker/start@v1
+
       - name: Install uv
         uses: astral-sh/setup-uv@v7
 
@@ -72,20 +81,7 @@ jobs:
           name: cibw-wheels-${{ matrix.os }}-${{ github.sha }}
           path: ./wheelhouse/*.whl
 
-  upload_pypi:
-    needs: [build_wheels, make_sdist]
-    runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/crosci
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/download-artifact@v8
+      - uses: samemrecebi/ci-carbon-tracker/stop@v1
+        if: always()
         with:
-          # unpacks all CIBW artifacts into dist/
-          pattern: cibw-*
-          path: dist
-          merge-multiple: true
-
-      - uses: pypa/gh-action-pypi-publish@release/v1
+          pr-comment: "true"
